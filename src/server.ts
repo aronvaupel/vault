@@ -1,1 +1,2 @@
-console.log('hello server!');
+import { readCredentials } from './utils/credentials';
+readCredentials();
