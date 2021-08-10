@@ -1,5 +1,5 @@
 export type DB = {
-  credential: Credential[];
+  credentials: Credential[];
 };
 export type Credential = {
   service: string;
