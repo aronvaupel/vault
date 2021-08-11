@@ -1,8 +1,13 @@
-import express from 'express';
-import { readCredentials } from './utils/credentials';
+import express, { response } from 'express';
+import { getCredential, readCredentials } from './utils/credentials';
 
 const app = express();
 const port = 3000;
+
+app.get('/api/credentials/:service', async (req, res) => {
+  const { service } = req.params;
+  res.json(await getCredential(service));
+});
 
 app.get('/api/credentials', async (_req, res) => {
   res.json(await readCredentials());
