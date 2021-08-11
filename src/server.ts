@@ -18,6 +18,7 @@ app.get('/api/credentials', async (_req, res) => {
   try {
     res.status(200).json(await readCredentials());
   } catch (error) {
+    console.error(error);
     response.status(500).send('Internal server error');
   }
 });
@@ -26,6 +27,7 @@ app.get('/', (_req, res) => {
   try {
     res.send('Hello World!');
   } catch (error) {
+    console.error(error);
     response.status(404).send('Can´t connect to server!');
   }
 });
