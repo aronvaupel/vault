@@ -1,17 +1,38 @@
 import express, { response } from 'express';
-import { getCredential, readCredentials } from './utils/credentials';
+import {
+  addCredential,
+  deleteCredential,
+  getCredential,
+  readCredentials,
+} from './utils/credentials';
+import type { Credential } from './types';
 
 const app = express();
 const port = 3000;
+app.use(express.json());
 
 app.get('/api/credentials/:service', async (req, res) => {
   const { service } = req.params;
   try {
-    const credential = await getCredential(service);
+    const credential: Credential = await getCredential(service);
     res.status(200).json(credential);
   } catch (error) {
     res.status(404).send(`Could not find service: ${service}`);
   }
+});
+
+app.post('/api/credentials', async (req, res) => {
+  const credential: Credential = req.body;
+  console.log(credential);
+  await addCredential(credential);
+  return res.status(200).send(credential);
+});
+
+app.delete('/api/credentials/:service', async (req, res) => {
+  const { service } = req.params;
+
+  await deleteCredential(service);
+  res.status(200).send('Deleted');
 });
 
 app.get('/api/credentials', async (_req, res) => {
