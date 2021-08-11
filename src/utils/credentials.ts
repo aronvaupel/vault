@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { Credential, DB } from '../types';
 
 export async function readCredentials(): Promise<Credential[]> {
@@ -17,4 +17,14 @@ export async function getCredential(service: string): Promise<Credential> {
     throw new Error(`No credential found for service: ${service}!`);
   }
   return credential;
+}
+
+export async function addCredential(credential: Credential): Promise<void> {
+  const credentials = await readCredentials();
+  // read existing credentials
+  const newCredentials = [...credentials, credential];
+  // add argument to existing credentials
+  const newDB: DB = { credentials: newCredentials };
+  // overwrite DB using writeFile :tada:
+  await writeFile('src/db.json', JSON.stringify(newDB));
 }
