@@ -14,7 +14,7 @@ export async function getCredential(service: string): Promise<Credential> {
     (credential) => credential.service === service
   );
   if (!credential) {
-    throw new Error(`No credential found for service:$(service)!`);
+    throw new Error(`No credential found for service: ${service}!`);
   }
   return credential;
 }
