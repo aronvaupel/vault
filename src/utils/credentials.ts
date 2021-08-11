@@ -26,5 +26,15 @@ export async function addCredential(credential: Credential): Promise<void> {
   // add argument to existing credentials
   const newDB: DB = { credentials: newCredentials };
   // overwrite DB using writeFile :tada:
-  await writeFile('src/db.json', JSON.stringify(newDB));
+  await writeFile('src/db.json', JSON.stringify(newDB, null, 2));
+}
+
+export async function deleteCredential(service: string): Promise<void> {
+  const credentials = await readCredentials();
+  const newCredentials = credentials.filter(
+    (credential) => credential.service.toLowerCase() !== service.toLowerCase()
+  );
+
+  const newDB: DB = { credentials: newCredentials };
+  await writeFile('src/db.json', JSON.stringify(newDB, null, 2));
 }
