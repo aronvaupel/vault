@@ -10,10 +10,26 @@ GET http://localhost:3000/api/credentials/google
 ### Add single credential
 
 POST http://localhost:3000/api/credentials
-
 Content-Type: application/json 
+
 {
-    "service": "google", 
+    "service": "bla", 
     "username": "", 
     "password": ""
+}
+
+### Delete single credential
+
+DELETE http://localhost:3000/api/credentials/bla
+
+
+### Update single credential
+
+PUT http://localhost:3000/api/credentials/bla
+Content-Type: application/json 
+
+{
+    "service": "bla", 
+    "username": "Aron", 
+    "password": "qwertz"
 }

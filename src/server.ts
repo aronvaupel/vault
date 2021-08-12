@@ -4,6 +4,7 @@ import {
   deleteCredential,
   getCredential,
   readCredentials,
+  updateCredential,
 } from './utils/credentials';
 import type { Credential } from './types';
 
@@ -41,6 +42,18 @@ app.get('/api/credentials', async (_req, res) => {
   } catch (error) {
     console.error(error);
     response.status(500).send('Internal server error');
+  }
+});
+
+app.put('/api/credentials/:service', async (req, res) => {
+  try {
+    const { service } = req.params;
+    const credential: Credential = req.body;
+    await updateCredential(service, credential);
+    res.status(200).send(credential);
+  } catch {
+    console.error('error');
+    res.status(404).send(`Could not find ${service}`);
   }
 });
 
