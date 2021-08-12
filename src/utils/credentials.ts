@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'fs/promises';
 import { Credential, DB } from '../types';
+import { encryptCredential } from './crypto';
 
 export async function readCredentials(): Promise<Credential[]> {
   const response = await readFile('src/db.json', 'utf-8');
@@ -21,11 +22,8 @@ export async function getCredential(service: string): Promise<Credential> {
 
 export async function addCredential(credential: Credential): Promise<void> {
   const credentials = await readCredentials();
-  // read existing credentials
-  const newCredentials = [...credentials, credential];
-  // add argument to existing credentials
+  const newCredentials = [...credentials, encryptCredential(credential)];
   const newDB: DB = { credentials: newCredentials };
-  // overwrite DB using writeFile :tada:
   await writeFile('src/db.json', JSON.stringify(newDB, null, 2));
 }
 
