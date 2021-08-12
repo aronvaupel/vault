@@ -1,4 +1,4 @@
-import express, { response } from 'express';
+import express from 'express';
 import {
   addCredential,
   deleteCredential,
@@ -41,7 +41,7 @@ app.get('/api/credentials', async (_req, res) => {
     res.status(200).json(await readCredentials());
   } catch (error) {
     console.error(error);
-    response.status(500).send('Internal server error');
+    res.status(500).send('Internal server error');
   }
 });
 
@@ -53,7 +53,7 @@ app.put('/api/credentials/:service', async (req, res) => {
     res.status(200).send(credential);
   } catch {
     console.error('error');
-    res.status(404).send(`Could not find ${service}`);
+    res.status(404).send(`Cannot not find `);
   }
 });
 
@@ -62,7 +62,7 @@ app.get('/', (_req, res) => {
     res.send('Hello World!');
   } catch (error) {
     console.error(error);
-    response.status(404).send('Can´t connect to server!');
+    res.status(404).send('Can´t connect to server!');
   }
 });
 
