@@ -1,4 +1,4 @@
-import express, { response } from 'express';
+import express from 'express';
 import {
   addCredential,
   deleteCredential,
@@ -7,6 +7,7 @@ import {
   updateCredential,
 } from './utils/credentials';
 import type { Credential } from './types';
+import { validatePassword } from './utils/validation';
 
 const app = express();
 const port = 3000;
@@ -14,46 +15,99 @@ app.use(express.json());
 
 app.get('/api/credentials/:service', async (req, res) => {
   const { service } = req.params;
+  const masterPassword = req.headers.authorization;
+  if (!masterPassword) {
+    res.status(400).send('Authorization header missing');
+    return;
+  } else if (!(await validatePassword(masterPassword))) {
+    res.status(401).send('Unauthorized request');
+    return;
+  }
   try {
-    const credential: Credential = await getCredential(service);
+    const credential = await getCredential(service, masterPassword);
     res.status(200).json(credential);
   } catch (error) {
+    console.error(error);
     res.status(404).send(`Could not find service: ${service}`);
   }
 });
 
 app.post('/api/credentials', async (req, res) => {
   const credential: Credential = req.body;
-  console.log(credential);
-  await addCredential(credential);
+  const masterPassword = req.headers.authorization;
+  if (!masterPassword) {
+    res.status(400).send('Authorization header missing');
+    return;
+  } else if (!(await validatePassword(masterPassword))) {
+    res.status(401).send('Unauthorized request');
+    return;
+  }
+  await addCredential(credential, masterPassword);
   return res.status(200).send(credential);
+});
+
+app.post('/api/credentials', async (request, response) => {
+  const credential: Credential = request.body;
+  const masterPassword = request.headers.authorization;
+  if (!masterPassword) {
+    response.status(400).send('Authorization header missing');
+    return;
+  } else if (!(await validatePassword(masterPassword))) {
+    response.status(401).send('Unauthorized request');
+    return;
+  }
+  await addCredential(credential, masterPassword);
+  return response.status(200).send(credential);
 });
 
 app.delete('/api/credentials/:service', async (req, res) => {
   const { service } = req.params;
-
+  const masterPassword = req.headers.authorization;
   await deleteCredential(service);
-  res.status(200).send('Deleted');
+  if (!masterPassword) {
+    res.status(400).send('Authorization header missing');
+    return;
+  } else if (!(await validatePassword(masterPassword))) {
+    res.status(401).send('Unauthorized request');
+    return;
+  }
 });
 
-app.get('/api/credentials', async (_req, res) => {
+app.get('/api/credentials', async (req, res) => {
+  const masterPassword = req.headers.authorization;
+  if (!masterPassword) {
+    res.status(400).send('Authorization header missing');
+    return;
+  } else if (!(await validatePassword(masterPassword))) {
+    res.status(401).send('Unauthorized request');
+    return;
+  }
   try {
     res.status(200).json(await readCredentials());
   } catch (error) {
     console.error(error);
-    response.status(500).send('Internal server error');
+    res.status(500).send('Internal server error');
   }
 });
 
 app.put('/api/credentials/:service', async (req, res) => {
+  const { service } = req.params;
+  const masterPassword = req.headers.authorization;
+  if (!masterPassword) {
+    res.status(400).send('Authorization header missing');
+    return;
+  } else if (!(await validatePassword(masterPassword))) {
+    res.status(401).send('Unauthorized request');
+    return;
+  }
   try {
     const { service } = req.params;
     const credential: Credential = req.body;
-    await updateCredential(service, credential);
+    await updateCredential(service, credential, masterPassword);
     res.status(200).send(credential);
   } catch {
     console.error('error');
-    res.status(404).send(`Could not find ${service}`);
+    res.status(404).send(`Cannot not find ${service}`);
   }
 });
 
@@ -62,7 +116,7 @@ app.get('/', (_req, res) => {
     res.send('Hello World!');
   } catch (error) {
     console.error(error);
-    response.status(404).send('Can´t connect to server!');
+    res.status(404).send('Can´t connect to server!');
   }
 });
 
