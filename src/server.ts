@@ -1,13 +1,19 @@
 import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
 import {
   addCredential,
   deleteCredential,
   getCredential,
-  readCredentials,
   updateCredential,
 } from './utils/credentials';
 import type { Credential } from './types';
 import { validatePassword } from './utils/validation';
+import { connectDatabase } from './utils/database';
+
+if (!process.env.MONGODB_URL) {
+  throw new Error('No mongo database available!');
+}
 
 const app = express();
 const port = 3000;
@@ -73,7 +79,8 @@ app.delete('/api/credentials/:service', async (req, res) => {
   }
 });
 
-app.get('/api/credentials', async (req, res) => {
+app.post('/api/credentials', async (req, res) => {
+  const credential: Credential = req.body;
   const masterPassword = req.headers.authorization;
   if (!masterPassword) {
     res.status(400).send('Authorization header missing');
@@ -82,16 +89,14 @@ app.get('/api/credentials', async (req, res) => {
     res.status(401).send('Unauthorized request');
     return;
   }
-  try {
-    res.status(200).json(await readCredentials());
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
-  }
+
+  const credentialId = await addCredential(credential, masterPassword);
+  return res.status(200).send(credentialId);
 });
 
-app.put('/api/credentials/:service', async (req, res) => {
+app.patch('/api/credentials/:service', async (req, res) => {
   const { service } = req.params;
+  const credential: Credential = req.body;
   const masterPassword = req.headers.authorization;
   if (!masterPassword) {
     res.status(400).send('Authorization header missing');
@@ -101,13 +106,11 @@ app.put('/api/credentials/:service', async (req, res) => {
     return;
   }
   try {
-    const { service } = req.params;
-    const credential: Credential = req.body;
     await updateCredential(service, credential, masterPassword);
-    res.status(200).send(credential);
-  } catch {
-    console.error('error');
-    res.status(404).send(`Cannot not find ${service}`);
+    res.status(200).json(credential);
+  } catch (error) {
+    console.error(error);
+    res.status(404).send(`Could not find service: ${service}`);
   }
 });
 
@@ -120,6 +123,9 @@ app.get('/', (_req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+connectDatabase(process.env.MONGODB_URL).then(() => {
+  console.log('connected to db');
+  app.listen(port, () => {
+    console.log(`Example app listening at http://localhost:${port}`);
+  });
 });
