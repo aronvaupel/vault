@@ -1,13 +1,13 @@
-import { readFile, writeFile } from 'fs/promises';
-import { Credential, DB } from '../types';
+import { Credential } from '../types';
 import { encryptCredential, decryptCredential } from './crypto';
 import { getCredentialCollection } from './database';
 
-export async function readCredentials(): Promise<Credential[]> {
-  const response = await readFile('src/db.json', 'utf-8');
-  const db: DB = JSON.parse(response);
-  const credentials = db.credentials;
-
+export async function readCredentials(key: string): Promise<Credential[]> {
+  const credentialCollection = getCredentialCollection();
+  const encryptedCredentials = await credentialCollection.find().toArray();
+  const credentials = encryptedCredentials.map((credential) =>
+    decryptCredential(credential, key)
+  );
   return credentials;
 }
 
@@ -34,27 +34,22 @@ export async function addCredential(
 }
 
 export async function deleteCredential(service: string): Promise<void> {
-  const credentials = await readCredentials();
-  const newCredentials = credentials.filter(
-    (credential) => credential.service.toLowerCase() !== service.toLowerCase()
-  );
-
-  const newDB: DB = { credentials: newCredentials };
-  await writeFile('src/db.json', JSON.stringify(newDB, null, 2));
+  const credentialCollection = getCredentialCollection();
+  await credentialCollection.deleteOne({ service });
 }
 
 export async function updateCredential(
   service: string,
+
   credential: Credential,
   key: string
 ): Promise<void> {
-  const credentials = await readCredentials();
+  const credentialCollection = getCredentialCollection();
+
   const encryptedCredential = encryptCredential(credential, key);
-  const filteredCredentials = credentials.filter(
-    (credential) => credential.service !== service
+
+  await credentialCollection.updateOne(
+    { service },
+    { $set: encryptedCredential }
   );
-  const newDB: DB = {
-    credentials: [...filteredCredentials, encryptedCredential],
-  };
-  await writeFile('src/db.json', JSON.stringify(newDB, null, 2));
 }
