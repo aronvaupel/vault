@@ -1,4 +1,6 @@
 import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
 import {
   addCredential,
   deleteCredential,
@@ -8,6 +10,11 @@ import {
 } from './utils/credentials';
 import type { Credential } from './types';
 import { validatePassword } from './utils/validation';
+import { connectDatabase } from './utils/database';
+
+if (!process.env.MONGODB_URL) {
+  throw new Error('No mongo database available!');
+}
 
 const app = express();
 const port = 3000;
@@ -120,6 +127,9 @@ app.get('/', (_req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+connectDatabase(process.env.MONGODB_URL).then(() => {
+  console.log('connected to db');
+  app.listen(port, () => {
+    console.log(`Example app listening at http://localhost:${port}`);
+  });
 });
