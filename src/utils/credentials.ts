@@ -15,16 +15,13 @@ export async function getCredential(
   service: string,
   key: string
 ): Promise<Credential> {
-  const credentials = await readCredentials();
-  const credential = credentials.find(
-    (credential) => credential.service === service
-  );
-  if (!credential) {
-    throw new Error(`No credential found for service: ${service}!`);
+  const credentialCollection = getCredentialCollection();
+  const encryptedCredential = await credentialCollection.findOne({ service });
+  if (!encryptedCredential) {
+    throw new Error(`Unable to find service ${service}`);
   }
-  const decryptedCredential = decryptCredential(credential, key);
-
-  return decryptedCredential;
+  const credential = decryptCredential(encryptedCredential, key);
+  return credential;
 }
 
 export async function addCredential(
