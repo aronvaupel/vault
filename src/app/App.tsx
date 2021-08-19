@@ -2,13 +2,17 @@ import React from 'react';
 
 import Dashboard from './pages/Dashboard/Dashboard';
 
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 function App(): JSX.Element {
   return (
-    <>
-      <Dashboard />
-    </>
+    <BrowserRouter>
+      <Switch>
+        <Route path="/">
+          <Dashboard />
+        </Route>
+      </Switch>
+    </BrowserRouter>
   );
 }
 
