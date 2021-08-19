@@ -1,16 +1,16 @@
 ### Get all credentials
 
-GET http://localhost:3000/api/credentials
+GET http://localhost:3001/api/credentials
 Authorization:{{$dotenv MASTERPASSWORD}}
 
 ### Get credential
 
-GET http://localhost:3000/api/credentials/bla
+GET http://localhost:3001/api/credentials/bla
 Authorization:{{$dotenv MASTERPASSWORD}}
 
 ### Add single credential
 
-POST http://localhost:3000/api/credentials
+POST http://localhost:3001/api/credentials
 Content-Type: application/json 
 Authorization:{{$dotenv MASTERPASSWORD}}
 
@@ -22,12 +22,12 @@ Authorization:{{$dotenv MASTERPASSWORD}}
 
 ### Delete single credential
 
-DELETE http://localhost:3000/api/credentials/bla
+DELETE http://localhost:3001/api/credentials/bla
 Authorization:{{$dotenv MASTERPASSWORD}}
 
 ### Update single credential
 
-PUT http://localhost:3000/api/credentials/blup
+PUT http://localhost:3001/api/credentials/blup
 Content-Type: application/json 
 Authorization:{{$dotenv MASTERPASSWORD}}
 
