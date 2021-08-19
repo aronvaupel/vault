@@ -6,7 +6,7 @@ export default function Dashboard(): JSX.Element {
     <>
       <h1 className={styles.container}>Vault</h1>
       <p>My personal password manager</p>
-      <input type="text" placeholder="Masterpassword"></input>
+      <input type="text" placeholder="Masterpassword" />
       <div>container for later</div>
     </>
   );
