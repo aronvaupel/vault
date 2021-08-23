@@ -34,6 +34,7 @@ export default function SearchPage(): JSX.Element {
       method: 'DELETE',
       headers: { Authorization: masterPassword },
     });
+    console.log('Deleted');
   }
 
   async function handleDeleteClick(service: string) {
@@ -61,7 +62,7 @@ export default function SearchPage(): JSX.Element {
         />
         <h4>Masterpassword</h4>
         <input
-          type="text"
+          type="password"
           placeholder="Masterpassword"
           value={masterPassword}
           onChange={(event) => setMasterPassword(event.target.value)}
