@@ -8,19 +8,34 @@ export default function Dashboard(): JSX.Element {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [masterPassword, setMasterPassword] = useState('');
 
+  async function fetchCredentials() {
+    const response = await fetch('/api/credentials', {
+      headers: {
+        Authorization: masterPassword,
+      },
+    });
+    const credentials = await response.json();
+    setCredentials(credentials);
+  }
+
   useEffect(() => {
-    async function fetchCredentials() {
-      const response = await fetch('/api/credentials', {
-        headers: {
-          Authorization: masterPassword,
-        },
-      });
-      const credentials = await response.json();
-      setCredentials(credentials);
+    if (!masterPassword) {
+      setCredentials([]);
     }
     fetchCredentials();
-    if (!masterPassword) setCredentials([]);
   }, [masterPassword]);
+
+  async function deleteCredential(service: string, masterPassword: string) {
+    await fetch(`/api/credentials/${service}`, {
+      method: 'DELETE',
+      headers: { Authorization: masterPassword },
+    });
+  }
+
+  async function handleDeleteClick(service: string) {
+    await deleteCredential(service, masterPassword);
+    await fetchCredentials();
+  }
 
   return (
     <main>
@@ -34,7 +49,11 @@ export default function Dashboard(): JSX.Element {
       <div className={styles.cardWrapper}>
         {credentials.length !== 0 &&
           credentials.map((credential) => (
-            <CredentialCard credentialData={credential} />
+            <CredentialCard
+              key={credential._id}
+              credentialData={credential}
+              onDeleteClick={handleDeleteClick}
+            />
           ))}
       </div>
       <Buttons />
