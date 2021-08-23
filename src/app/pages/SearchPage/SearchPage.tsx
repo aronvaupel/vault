@@ -7,6 +7,7 @@ export default function SearchPage(): JSX.Element {
   const [credential, setCredential] = useState<Credential | null>();
   const [masterPassword, setMasterPassword] = useState<string>('');
   const [searchService, setSearchService] = useState<string>('');
+  const [isError, setIsError] = useState<boolean>(false);
 
   async function findCredential() {
     const response = await fetch(`/api/credentials/${searchService}`, {
@@ -14,13 +15,31 @@ export default function SearchPage(): JSX.Element {
         Authorization: masterPassword,
       },
     });
-    const credential = await response.json();
+    if (!response.ok) {
+      setIsError(true);
+      console.log('Credential not found');
+      return;
+    }
+    setIsError(false);
+    const credential: Credential = await response.json();
     setCredential(credential);
   }
 
   useEffect(() => {
     if (!masterPassword) setCredential(null);
   }, [masterPassword]);
+
+  async function deleteCredential(service: string, masterPassword: string) {
+    await fetch(`/api/credentials/${service}`, {
+      method: 'DELETE',
+      headers: { Authorization: masterPassword },
+    });
+  }
+
+  async function handleDeleteClick(service: string) {
+    await deleteCredential(service, masterPassword);
+    await findCredential();
+  }
 
   return (
     <main>
@@ -54,8 +73,14 @@ export default function SearchPage(): JSX.Element {
         </button>
       </form>
       <div className={styles.cardWrapper}>
-        {credential && <CredentialCard credentialData={credential} />}
+        {credential && (
+          <CredentialCard
+            credentialData={credential}
+            onDeleteClick={handleDeleteClick}
+          />
+        )}
       </div>
+      {isError && <p>Something went wrong!</p>}
     </main>
   );
 }
