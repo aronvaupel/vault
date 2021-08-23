@@ -5,6 +5,7 @@ import {
   addCredential,
   deleteCredential,
   getCredential,
+  readCredentials,
   updateCredential,
 } from './utils/credentials';
 import type { Credential } from './types';
@@ -16,8 +17,26 @@ if (!process.env.MONGODB_URL) {
 }
 
 const app = express();
-const port = 3000;
+const port = 3001;
 app.use(express.json());
+
+app.get('/api/credentials', async (req, res) => {
+  const masterPassword = req.headers.authorization;
+  if (!masterPassword) {
+    res.status(400).send('Authorization header missing');
+    return;
+  } else if (!(await validatePassword(masterPassword))) {
+    res.status(401).send('Unauthorized request');
+    return;
+  }
+  try {
+    const credentials = await readCredentials(masterPassword);
+    res.status(200).json(credentials);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error! Please try again later.');
+  }
+});
 
 app.get('/api/credentials/:service', async (req, res) => {
   const { service } = req.params;
